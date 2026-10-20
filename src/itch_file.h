@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <type_traits>
 
 // An ITCH 5.0 file as NASDAQ publishes it: each message is preceded by its length (2 bytes,
 // big-endian). The file is memory-mapped read-only. A cut-off message at the end (from a partial
@@ -15,7 +16,8 @@ class ItchFile {
   ItchFile(const ItchFile &) = delete;
   ItchFile &operator=(const ItchFile &) = delete;
 
-  // Calls f(message, length) for each complete message, in order, and returns how many there were.
+  // Calls f(message, length) for each complete message, in order, and returns how many it was called
+  // for. If f returns bool, returning false stops the loop after that message.
   template <class F>
   size_t forEach(F f) const {
     size_t count = 0;
@@ -23,9 +25,14 @@ class ItchFile {
       uint16_t len = uint16_t(data_[pos] << 8 | data_[pos + 1]);
       if (pos + 2 + len > size_)
         break;
-      f(data_ + pos + 2, len);
       pos += 2 + len;
       ++count;
+      if constexpr (std::is_same_v<std::invoke_result_t<F, const uint8_t *, uint16_t>, bool>) {
+        if (!f(data_ + pos - len, len))
+          break;
+      } else {
+        f(data_ + pos - len, len);
+      }
     }
     return count;
   }
