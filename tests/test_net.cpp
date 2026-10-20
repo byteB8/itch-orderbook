@@ -16,9 +16,12 @@ void histogram() {
   CHECK_EQ(h.percentile(50), 50u);
   CHECK_EQ(h.percentile(99), 99u);
   CHECK_EQ(h.percentile(100), 100u);
-  h.add(5'000'000);  // beyond the 1 ms buckets: reported as the maximum
-  CHECK_EQ(h.percentile(100), 5'000'000u);
-  CHECK_EQ(h.count(), 101u);
+  for (int i = 0; i < 200; ++i)
+    h.add(5'123'456);  // 5.12 ms: counted in 1 us buckets
+  CHECK_EQ(h.percentile(50), 5'123'000u);
+  h.add(3'000'000'000ull);  // beyond 1 s: reported as the maximum
+  CHECK_EQ(h.percentile(100), 3'000'000'000u);
+  CHECK_EQ(h.count(), 301u);
 }
 
 void tscClock() {
