@@ -5,7 +5,7 @@
 #   threads2-smt  receive thread on CPU 2, book thread on CPU 6: two hardware threads of one core
 # The publisher runs on CPU 1. The CPU numbers suit the laptop (CPUs 0-3 are cores 0-3, 4-7 their SMT
 # siblings); override with PUB_CPU, RX_CPU, CORE_CPU and SMT_CPU elsewhere. Appends one row per run to
-# results/pipeline.csv and writes each run's latency histogram to results/raw/.
+# $OUT/pipeline.csv (default results/) and writes each run's latency histogram to results/raw/.
 #
 #   scripts/run_pipeline.sh [itch file] [messages per run]
 set -euo pipefail
@@ -17,7 +17,7 @@ pub_cpu=${PUB_CPU:-1}
 rx_cpu=${RX_CPU:-2}
 core_cpu=${CORE_CPU:-3}
 smt_cpu=${SMT_CPU:-6}
-out=results/pipeline.csv
+out=${OUT:-results}/pipeline.csv
 mkdir -p results/raw
 rm -f "$out"
 
