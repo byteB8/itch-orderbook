@@ -1,0 +1,5 @@
+queue,cpu_a,cpu_b,pair,messages_per_s,rtt_p50_ns,rtt_p99_ns,rtt_p999_ns
+spsc,2,3,separate-cores,21240995,304,406,475
+mutex,2,3,separate-cores,5742337,1278,1829,2842
+spsc,2,18,smt-siblings,134341040,71,82,86
+mutex,2,18,smt-siblings,5092860,1117,2823,3835

@@ -1,0 +1,6 @@
+# publisher --rate 1000000 --limit 5000000 --drop-every 100
+sent 5000000 messages in 109672 packets (1096 dropped on purpose) in 5.00 s: 1000003 messages/s
+# feed_handler --threads 1
+drop-every-100: 108576 packets, 4949920 messages in 5.00 s (989989 messages/s); missed 50080, duplicates 0, malformed 0; receive buffer 425984 bytes
+books: unknown orders 61770, over-executed 0, orders on the book 246227
+latency, packet received to message applied (ns): p50 2579  p90 5467  p99 12024  p99.9 43647  max 4043714

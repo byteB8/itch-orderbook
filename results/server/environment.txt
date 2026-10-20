@@ -1,0 +1,7 @@
+cpu: Intel(R) Xeon(R) Gold 6326 CPU @ 2.90GHz
+logical cpus: 32
+compiler: g++-11 (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+kernel: 6.8.0-124-generic
+transparent huge pages: always [madvise] never
+net.core.rmem_max: 212992
+data: data/itch/12302019.NASDAQ_ITCH50.first500MB
