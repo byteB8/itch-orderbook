@@ -3,13 +3,15 @@
 //   bench_book <itch file> <out_dir> [--rounds 5]
 //
 // 1. Throughput: replays the whole file into fresh books with each combination of price-level container
-//    (sorted vector, std::map) and order index (open addressing, std::unordered_map). The combinations run
-//    in rotating order within each round, so a slow spell of the machine hits all of them; the median of
-//    the rounds is reported. Writes book.csv.
+//    (sorted vector, std::map) and order index (open addressing, std::unordered_map), and once more with
+//    the default books on 4 KB pages instead of huge pages. The variants run in rotating order within each
+//    round, so a slow spell of the machine hits all of them; the median of the rounds is reported. Writes
+//    book.csv.
 // 2. Latency: one more replay with the default books, timing each message with the TSC; percentiles per
 //    message type. Writes book_latency.csv.
 #include "cpu.h"
 #include "feed_book.h"
+#include "huge_pages.h"
 #include "itch_file.h"
 #include "latency.h"
 
@@ -26,11 +28,13 @@
 namespace {
 
 template <class Feed>
-double nsPerMessage(const ItchFile &file) {
+double nsPerMessage(const ItchFile &file, bool hugePages = true) {
+  huge_pages::enabled() = hugePages;  // for every allocation of this replay, growth included
   auto feed = std::make_unique<Feed>();
   auto start = std::chrono::steady_clock::now();
   size_t n = file.forEach([&](const uint8_t *m, uint16_t) { feed->apply(m); });
   double ns = std::chrono::duration<double, std::nano>(std::chrono::steady_clock::now() - start).count();
+  huge_pages::enabled() = true;
   if (feed->stats().unknownOrders != 0)
     throw std::runtime_error("books out of step with the feed");
   return ns / double(n);
@@ -66,6 +70,7 @@ int main(int argc, char **argv) {
         {"vector", "std", [&] { return nsPerMessage<FeedBook<VectorLevels, StdOrderIndex>>(file); }, {}},
         {"map", "flat", [&] { return nsPerMessage<FeedBook<MapLevels, FlatOrderIndex>>(file); }, {}},
         {"map", "std", [&] { return nsPerMessage<FeedBook<MapLevels, StdOrderIndex>>(file); }, {}},
+        {"vector", "flat-4k", [&] { return nsPerMessage<FeedBook<VectorLevels, FlatOrderIndex>>(file, false); }, {}},
     };
     FILE *csv = std::fopen((out + "/book.csv").c_str(), "w");
     if (!csv)
@@ -77,13 +82,13 @@ int main(int argc, char **argv) {
         double ns = v.run();
         v.ns.push_back(ns);
         std::fprintf(csv, "%s,%s,%d,%.2f\n", v.levels, v.index, r, ns);
-        std::printf("round %d: levels %-6s index %-4s %.1f ns per message\n", r, v.levels, v.index, ns);
+        std::printf("round %d: levels %-6s index %-7s %.1f ns per message\n", r, v.levels, v.index, ns);
         std::fflush(stdout);
       }
     std::fclose(csv);
     for (Variant &v : variants) {
       std::sort(v.ns.begin(), v.ns.end());
-      std::printf("median: levels %-6s index %-4s %.1f ns per message (min %.1f, max %.1f)\n", v.levels, v.index,
+      std::printf("median: levels %-6s index %-7s %.1f ns per message (min %.1f, max %.1f)\n", v.levels, v.index,
                   v.ns[v.ns.size() / 2], v.ns.front(), v.ns.back());
     }
 
