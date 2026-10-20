@@ -90,15 +90,15 @@ order's price. What is left of a day order rests on the book; an immediate-or-ca
 </p>
 
 [`bench/bench_book.cpp`](bench/bench_book.cpp) replays the whole file into fresh books with each design, five
-rounds with the designs in rotating order, after one pass that maps the file's pages; the first round runs
-slower on both machines while memory is first set up, which the median absorbs.
+rounds with the designs in rotating order, after one pass that maps the file's pages. The first round ran
+slower on both machines (127 and 200 ns for the default design); the median absorbs it.
 
-- **Sorted vector against `std::map`:** almost every change is near the top of the book, so a short scan of
-  contiguous levels beats a walk down a tree of separately allocated nodes.
+- **Sorted vector against `std::map`:** changes cluster near the top of the book, so a scan of contiguous
+  levels from the best price beats a walk down a tree of separately allocated nodes.
 - **Open addressing against `std::unordered_map`:** a lookup reads the slot it needs, usually one cache line,
   instead of reading a bucket and following a pointer to a node.
-- **Huge pages:** 12% on the server, 6% on the laptop. The order index and pool span more than 200 MB, and
-  with 4 KB pages most random reads there also miss the TLB.
+- **Huge pages:** 12% on the server, 6% on the laptop. The order index (128 MB) and the pool span well over
+  100 MB, and with 4 KB pages most random reads there also miss the TLB.
 
 <p align="center">
 <picture>
@@ -120,7 +120,7 @@ A replace costs the most: it removes one order and adds another, often at a diff
 
 [`bench/bench_queue.cpp`](bench/bench_queue.cpp) runs both queues between two pinned threads. The mutex
 version loses to lock traffic and, under contention, to futex system calls. Two SMT threads of one core share
-their L1 and L2 caches, so a hand-off there costs a quarter of one between cores.
+their L1 and L2 caches, so on the server a hand-off there costs a quarter of one between cores.
 
 ### Feed handler
 
