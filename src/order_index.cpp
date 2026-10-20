@@ -43,7 +43,7 @@ bool FlatOrderIndex::erase(uint64_t key) {
 }
 
 void FlatOrderIndex::grow() {
-  std::vector<Slot> old(slots_.size() * 2, Slot{0, 0, 0});
+  std::vector<Slot, HugePageAllocator<Slot>> old(slots_.size() * 2, Slot{0, 0, 0});
   old.swap(slots_);
   mask_ = slots_.size() - 1;
   --shift_;

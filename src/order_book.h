@@ -5,6 +5,8 @@
 // priority (FIFO). Orders live in an OrderPool and are linked by pool index, so adding, removing and
 // shrinking an order needs no allocation once the pool and the levels have grown.
 
+#include "huge_pages.h"
+
 #include <cstdint>
 #include <functional>
 #include <map>
@@ -21,7 +23,7 @@ struct Order {
   char side = 'B';      // 'B' buy, 'S' sell
 };
 
-// Every order of a feed in one vector; the slots of removed orders are reused.
+// Every order of a feed in one vector, on huge pages; the slots of removed orders are reused.
 class OrderPool {
  public:
   int32_t alloc(const Order &o) {
@@ -41,7 +43,7 @@ class OrderPool {
   void reserve(size_t n) { orders_.reserve(n); }
 
  private:
-  std::vector<Order> orders_;
+  std::vector<Order, HugePageAllocator<Order>> orders_;
   std::vector<int32_t> free_;
 };
 

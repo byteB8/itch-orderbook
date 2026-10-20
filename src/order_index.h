@@ -5,15 +5,17 @@
 // interface: find returns nullptr if the key is absent; insert requires an absent key; erase returns
 // whether the key was there.
 
+#include "huge_pages.h"
+
 #include <cstddef>
 #include <cstdint>
 #include <unordered_map>
 #include <vector>
 
-// Open addressing with linear probing: 16-byte slots in one power-of-two array, kept at most half
-// full. An erase shifts the later entries of its probe run back into the hole instead of leaving a
-// tombstone, so lookups do not slow down as orders come and go -- the feed deletes nearly every order
-// it adds.
+// Open addressing with linear probing: 16-byte slots in one power-of-two array on huge pages, kept at
+// most half full. An erase shifts the later entries of its probe run back into the hole instead of
+// leaving a tombstone, so lookups do not slow down as orders come and go -- the feed deletes nearly
+// every order it adds.
 class FlatOrderIndex {
  public:
   explicit FlatOrderIndex(size_t expected = 1024);
@@ -44,7 +46,7 @@ class FlatOrderIndex {
   size_t home(uint64_t key) const { return size_t((key * 0x9E3779B97F4A7C15ull) >> shift_); }
   void grow();
 
-  std::vector<Slot> slots_;
+  std::vector<Slot, HugePageAllocator<Slot>> slots_;
   size_t mask_ = 0;
   size_t size_ = 0;
   int shift_ = 64;
