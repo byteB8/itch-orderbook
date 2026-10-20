@@ -199,7 +199,7 @@ scripts/fetch_itch.sh    # the first 500 MB of NASDAQ's 30 Dec 2019 sample: 1.26
 ```
 
 ```text
-40287943 messages in 9.74 s: 241.7 ns per message (levels vector, index flat)
+40287943 messages in 5.50 s: 136.6 ns per message (levels vector, index flat)
 adds 17863760, executions 684933, cancels 901427, deletes 15651635, replaces 3693371, other 1492817
 unknown orders 0, over-executed 0, orders on the book at the end 1708375
 AAPL (locate 13): 3603 bid levels, 1070 ask levels
@@ -207,9 +207,7 @@ AAPL (locate 13): 3603 bid levels, 1070 ask levels
   asks:  400 @ 287.0400 (3)  300 @ 287.0500 (3)  200 @ 287.0600 (2)
 ```
 
-That run, on the server, also pays for mapping each page of the 1.26 GB file on first touch; the benchmark
-maps the pages before it starts timing, hence 115 ns there. AAPL's book at 10:00:39: best bid $287.00, best
-ask $287.04.
+That run is on the laptop (`taskset -c 2`). AAPL's book at 10:00:39: best bid $287.00, best ask $287.04.
 
 The feed over multicast, on one host (the sender's TTL is 0, so nothing leaves the machine):
 
