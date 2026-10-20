@@ -13,6 +13,7 @@
 #include <cstdio>
 #include <cstring>
 #include <exception>
+#include <stdexcept>
 #include <string>
 
 namespace {
