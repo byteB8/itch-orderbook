@@ -7,6 +7,7 @@
 // --threads 2: the receive thread polls the socket and hands each message to a book thread through an
 //              SPSC queue. --threads 1: the receive thread applies the messages itself.
 // It stops at the end-of-session packet, or 5 s after the last packet.
+#include "cli.h"
 #include "cpu.h"
 #include "feed_book.h"
 #include "itch.h"
@@ -101,25 +102,26 @@ void receive(MulticastReceiver &rx, mold::SequenceTracker &tracker, Counters &c,
 int main(int argc, char **argv) {
   Options opt;
   for (int i = 1; i < argc; ++i) {
-    auto next = [&] { return i + 1 < argc ? std::string(argv[++i]) : std::string("0"); };
-    if (!std::strcmp(argv[i], "--group"))
+    const char *option = argv[i];
+    auto next = [&] { return i + 1 < argc ? std::string(argv[++i]) : std::string(); };
+    if (!std::strcmp(option, "--group"))
       opt.group = next();
-    else if (!std::strcmp(argv[i], "--port"))
-      opt.port = std::stoi(next());
-    else if (!std::strcmp(argv[i], "--threads"))
-      opt.threads = std::stoi(next());
-    else if (!std::strcmp(argv[i], "--rx-cpu"))
-      opt.rxCpu = std::stoi(next());
-    else if (!std::strcmp(argv[i], "--book-cpu"))
-      opt.bookCpu = std::stoi(next());
-    else if (!std::strcmp(argv[i], "--label"))
+    else if (!std::strcmp(option, "--port"))
+      opt.port = optionValue<uint16_t>("feed_handler", option, next());
+    else if (!std::strcmp(option, "--threads"))
+      opt.threads = optionValue<int>("feed_handler", option, next());
+    else if (!std::strcmp(option, "--rx-cpu"))
+      opt.rxCpu = optionValue<int>("feed_handler", option, next());
+    else if (!std::strcmp(option, "--book-cpu"))
+      opt.bookCpu = optionValue<int>("feed_handler", option, next());
+    else if (!std::strcmp(option, "--label"))
       opt.label = next();
-    else if (!std::strcmp(argv[i], "--result"))
+    else if (!std::strcmp(option, "--result"))
       opt.result = next();
-    else if (!std::strcmp(argv[i], "--hist"))
+    else if (!std::strcmp(option, "--hist"))
       opt.hist = next();
     else {
-      std::fprintf(stderr, "feed_handler: unknown option %s\n", argv[i]);
+      std::fprintf(stderr, "feed_handler: unknown option %s\n", option);
       return 2;
     }
   }

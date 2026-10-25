@@ -9,6 +9,7 @@
 //    book.csv.
 // 2. Latency: one more replay with the default books, timing each message with the TSC; percentiles per
 //    message type. Writes book_latency.csv.
+#include "cli.h"
 #include "cpu.h"
 #include "feed_book.h"
 #include "huge_pages.h"
@@ -51,9 +52,9 @@ int main(int argc, char **argv) {
   int rounds = 5, cpu = -1;
   for (int i = 3; i + 1 < argc; i += 2) {
     if (!std::strcmp(argv[i], "--rounds"))
-      rounds = std::stoi(argv[i + 1]);
+      rounds = optionValue<int>("bench_book", argv[i], argv[i + 1]);
     else if (!std::strcmp(argv[i], "--cpu"))
-      cpu = std::stoi(argv[i + 1]);
+      cpu = optionValue<int>("bench_book", argv[i], argv[i + 1]);
   }
   try {
     pinThisThread(cpu);

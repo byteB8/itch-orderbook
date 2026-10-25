@@ -6,6 +6,7 @@
 // --rate 0 sends as fast as it can. --drop-every N skips every Nth packet (its sequence numbers are used
 // all the same), to exercise gap detection in the receiver. Packets carry up to 1,400 bytes. The session
 // ends with an end-of-session packet, sent three times in case one is lost.
+#include "cli.h"
 #include "cpu.h"
 #include "itch_file.h"
 #include "moldudp64.h"
@@ -24,21 +25,22 @@ int main(int argc, char **argv) {
   double rate = 1e6;
   uint64_t limit = 0, dropEvery = 0;
   for (int i = 1; i < argc; ++i) {
-    auto next = [&] { return i + 1 < argc ? std::string(argv[++i]) : std::string("0"); };
-    if (!std::strcmp(argv[i], "--group"))
+    const char *option = argv[i];
+    auto next = [&] { return i + 1 < argc ? std::string(argv[++i]) : std::string(); };
+    if (!std::strcmp(option, "--group"))
       group = next();
-    else if (!std::strcmp(argv[i], "--port"))
-      port = std::stoi(next());
-    else if (!std::strcmp(argv[i], "--rate"))
-      rate = std::stod(next());
-    else if (!std::strcmp(argv[i], "--limit"))
-      limit = std::stoull(next());
-    else if (!std::strcmp(argv[i], "--drop-every"))
-      dropEvery = std::stoull(next());
-    else if (!std::strcmp(argv[i], "--cpu"))
-      cpu = std::stoi(next());
+    else if (!std::strcmp(option, "--port"))
+      port = optionValue<uint16_t>("publisher", option, next());
+    else if (!std::strcmp(option, "--rate"))
+      rate = optionValue<double>("publisher", option, next());
+    else if (!std::strcmp(option, "--limit"))
+      limit = optionValue<uint64_t>("publisher", option, next());
+    else if (!std::strcmp(option, "--drop-every"))
+      dropEvery = optionValue<uint64_t>("publisher", option, next());
+    else if (!std::strcmp(option, "--cpu"))
+      cpu = optionValue<int>("publisher", option, next());
     else
-      file = argv[i];
+      file = option;
   }
   if (file.empty()) {
     std::fprintf(stderr, "usage: publisher <itch file> [--group G] [--port P] [--rate R] [--limit N] "

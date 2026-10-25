@@ -6,6 +6,7 @@
 //
 // --summary writes one row per instrument with orders on the book: the state that
 // scripts/check_books.py computes independently.
+#include "cli.h"
 #include "feed_book.h"
 #include "itch_file.h"
 
@@ -85,19 +86,20 @@ int run(const Options &opt) {
 int main(int argc, char **argv) {
   Options opt;
   for (int i = 1; i < argc; ++i) {
+    const char *option = argv[i];
     auto value = [&] { return i + 1 < argc ? std::string(argv[++i]) : std::string(); };
-    if (!std::strcmp(argv[i], "--levels"))
+    if (!std::strcmp(option, "--levels"))
       opt.levels = value();
-    else if (!std::strcmp(argv[i], "--index"))
+    else if (!std::strcmp(option, "--index"))
       opt.index = value();
-    else if (!std::strcmp(argv[i], "--symbol"))
+    else if (!std::strcmp(option, "--symbol"))
       opt.symbol = value();
-    else if (!std::strcmp(argv[i], "--depth"))
-      opt.depth = std::stoi(value());
-    else if (!std::strcmp(argv[i], "--summary"))
+    else if (!std::strcmp(option, "--depth"))
+      opt.depth = optionValue<int>("replay", option, value());
+    else if (!std::strcmp(option, "--summary"))
       opt.summary = value();
     else
-      opt.file = argv[i];
+      opt.file = option;
   }
   if (opt.file.empty()) {
     std::fprintf(stderr, "usage: replay <file> [--levels vector|map] [--index flat|std] [--symbol S] "
