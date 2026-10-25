@@ -78,7 +78,8 @@ order's price. What is left of a day order rests on the book; an immediate-or-ca
 ## Benchmarks
 
 `scripts/run_all.sh <machine>` runs everything below and writes `results/<machine>/`; `scripts/plots.py
-<machine>` draws the figures, which show the server. Every timing is the median over repeated runs.
+<machine>` draws the figures, which show the server. The book timings are medians of five rounds; the queue and
+pipeline numbers come from one run each.
 
 ### Building books
 
@@ -132,7 +133,7 @@ their L1 and L2 caches, so on the server a hand-off there costs a quarter of one
 </p>
 
 [`scripts/run_pipeline.sh`](scripts/run_pipeline.sh) runs the publisher and the feed handler on one host,
-5M messages per run, at 100K to 2M messages per second.
+5M messages per run (the first 5M of the file, all before the 09:30 open), at 100K to 2M messages per second.
 
 - **No message was lost** at any rate in any set-up.
 - **One thread was faster than two at every rate**, by about 0.75 us at the median. Each hand-off moves a
