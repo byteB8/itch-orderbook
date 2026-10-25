@@ -116,6 +116,18 @@ class SequenceTracker {
     return v;
   }
 
+  // The end-of-session packet carries the sequence number after the last message, so a loss just before
+  // it shows up as a gap, as after a heartbeat.
+  void onEndOfSession(uint64_t sequence) { onPacket(sequence, 0); }
+
+  // After onPacket, for a packet cut short: only its first `delivered` messages arrived. The rest count
+  // as missed, except those an earlier packet already brought.
+  void cutShort(const Verdict &v, uint64_t delivered, uint16_t count) {
+    uint64_t from = std::max(delivered, v.skip);
+    if (from < count)
+      gaps_ += count - from;
+  }
+
   uint64_t next() const { return next_; }         // the next sequence number expected
   uint64_t gaps() const { return gaps_; }         // messages missed in total
   uint64_t duplicates() const { return duplicates_; }

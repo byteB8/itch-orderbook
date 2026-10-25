@@ -57,10 +57,32 @@ void sequenceTracking() {
   CHECK_EQ(t.duplicates(), 5u);
 }
 
+// Losses that no later data packet reveals: just before the end of the session, and inside a packet that
+// was cut short.
+void lossesAtTheEdges() {
+  mold::SequenceTracker t;
+  t.onPacket(1, 5);       // messages 1-5
+  t.onEndOfSession(9);    // the session ended after message 8: 6-8 were lost
+  CHECK_EQ(t.gaps(), 3u);
+
+  mold::SequenceTracker c;
+  auto v = c.onPacket(1, 4);  // messages 1-4, but only message 1 arrived intact
+  c.cutShort(v, 1, 4);
+  CHECK_EQ(c.gaps(), 3u);
+  CHECK_EQ(c.next(), 5u);
+  v = c.onPacket(3, 4);       // 3-4 already counted, 5-6 new; again only the first message arrived
+  c.cutShort(v, 1, 4);
+  CHECK_EQ(c.gaps(), 5u);
+  v = c.onPacket(7, 2);       // in sequence: the cut messages are not counted twice
+  CHECK(v.skip == 0 && v.gap == 0);
+  CHECK_EQ(c.gaps(), 5u);
+}
+
 }  // namespace
 
 int main() {
   packAndParse();
   sequenceTracking();
+  lossesAtTheEdges();
   return report("test_moldudp64");
 }
