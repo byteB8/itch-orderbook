@@ -10,9 +10,9 @@
 #include <cstdint>
 #include <vector>
 
-// Reading the time-stamp counter takes about 20 cycles, against about 20 ns for clock_gettime. On CPUs
-// with an invariant TSC (constant_tsc and nonstop_tsc in /proc/cpuinfo) it ticks at a constant rate on
-// every core; that rate is measured once against steady_clock.
+// Reading the time-stamp counter costs about 25 cycles (Agner Fog's instruction tables), less than a
+// clock_gettime call. On CPUs with an invariant TSC (constant_tsc and nonstop_tsc in /proc/cpuinfo) it
+// ticks at a constant rate on every core; that rate is measured once against steady_clock.
 class TscClock {
  public:
   TscClock() {
