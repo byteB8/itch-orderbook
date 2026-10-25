@@ -231,7 +231,7 @@ src/matching_engine.h           price-time-priority matching on the same books
 src/huge_pages.h                allocator on 2 MB transparent huge pages
 src/spsc_queue.h                lock-free single-producer, single-consumer queue
 src/moldudp64.h, udp.{h,cpp}    MoldUDP64 framing and sequence tracking; multicast sockets
-src/latency.h, cpu.h            TSC clock and latency histogram; thread pinning
+src/latency.h, cpu.h, cli.h     TSC clock and latency histogram; thread pinning; option values
 tools/                          itch_stats, replay, publisher, feed_handler
 tests/                          unit, differential and random tests
 bench/                          book and queue benchmarks
