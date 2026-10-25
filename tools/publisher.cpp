@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
     ItchFile itch(file);
     MulticastSender tx(group, uint16_t(port));
     mold::Packer packer("ITCH50", 1400);
-    uint64_t sequence = 1, sent = 0, packets = 0, dropped = 0;
+    uint64_t sequence = 1, sent = 0, packets = 0, dropped = 0, failed = 0;
     using Clock = std::chrono::steady_clock;
     auto start = Clock::now();
 
@@ -65,8 +65,8 @@ int main(int argc, char **argv) {
       }
       if (dropEvery && (packets + 1) % dropEvery == 0)
         ++dropped;
-      else
-        tx.send(packer.data(), packer.size());
+      else if (!tx.send(packer.data(), packer.size()))
+        ++failed;  // to the receiver this looks like a lost packet
       ++packets;
       sequence += packer.count();
       packer.start(sequence);
@@ -90,11 +90,12 @@ int main(int argc, char **argv) {
     packer.finish(mold::kEndOfSession);
     for (int i = 0; i < 3; ++i) {
       std::this_thread::sleep_for(std::chrono::milliseconds(20));
-      tx.send(packer.data(), packer.size());
+      failed += !tx.send(packer.data(), packer.size());
     }
-    std::printf("sent %llu messages in %llu packets (%llu dropped on purpose) in %.2f s: %.0f messages/s\n",
-                (unsigned long long)sent, (unsigned long long)packets, (unsigned long long)dropped, seconds,
-                sent / seconds);
+    std::printf("sent %llu messages in %llu packets (%llu dropped on purpose, %llu failed to send) in %.2f s: "
+                "%.0f messages/s\n",
+                (unsigned long long)sent, (unsigned long long)packets, (unsigned long long)dropped,
+                (unsigned long long)failed, seconds, sent / seconds);
   } catch (const std::exception &e) {
     std::fprintf(stderr, "publisher: %s\n", e.what());
     return 1;
