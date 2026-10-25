@@ -76,17 +76,23 @@ void receive(MulticastReceiver &rx, mold::SequenceTracker &tracker, Counters &c,
       continue;
     }
     uint16_t count = itch::be16(buf.data() + 18);
-    if (count == mold::kEndOfSession)
+    uint64_t sequence = itch::be64(buf.data() + 10);
+    if (count == mold::kEndOfSession) {
+      tracker.onEndOfSession(sequence);
       return;
+    }
     ++c.packets;
-    mold::SequenceTracker::Verdict v = tracker.onPacket(itch::be64(buf.data() + 10), count);
+    mold::SequenceTracker::Verdict v = tracker.onPacket(sequence, count);
     uint64_t index = 0;
     mold::Header h{};
     bool ok = mold::parse(buf.data(), size_t(n), h, [&](const uint8_t *m, uint16_t len) {
       if (index++ >= v.skip)
         onMessage(m, len, received);
     });
-    c.malformed += !ok;
+    if (!ok) {  // cut short: the messages after the cut count as missed
+      ++c.malformed;
+      tracker.cutShort(v, index, count);
+    }
   }
 }
 
