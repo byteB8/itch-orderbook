@@ -121,7 +121,7 @@ class SequenceTracker {
   uint64_t duplicates() const { return duplicates_; }
 
  private:
-  uint64_t next_ = 1;  // MoldUDP64 numbers the first message of a session 1
+  uint64_t next_ = 1;  // the publisher numbers a session's first message 1
   uint64_t gaps_ = 0;
   uint64_t duplicates_ = 0;
 };
