@@ -179,8 +179,8 @@ UndefinedBehaviorSanitizer, and the queue test under ThreadSanitizer.
   probe runs wrap around the end.
 - **SPSC queue:** 10M items through two threads, in order and intact. ThreadSanitizer is clean, and reports a
   data race when the store that publishes a slot is weakened from release to relaxed.
-- **Network pieces:** MoldUDP64 framing, sequence tracking, loopback multicast, the latency histogram and the TSC
-  clock.
+- **Network pieces:** MoldUDP64 framing; sequence tracking, including a loss just before the end of a session
+  and a packet cut short; loopback multicast; the latency histogram and the TSC clock.
 
 Each test was also run against deliberately broken versions of the code it covers (wrong deletion rules,
 newest-first queues, trades at the wrong price, an immediate-or-cancel order left on the book); all of them
