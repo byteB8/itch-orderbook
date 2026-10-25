@@ -34,8 +34,8 @@ On a server with an Intel Xeon Gold 6326, one core per thread, g++ 11 with `-O2`
 [`src/itch.h`](src/itch.h) decodes the ITCH 5.0 messages that change the visible book: add (A, F), execute
 (E, C), cancel part of an order (X), delete (D), replace (U), and the stock directory (R) that names each
 instrument. Fields are big-endian, read with `memcpy` and a byte swap; prices carry four implied decimals.
-[`src/itch_file.h`](src/itch_file.h) memory-maps a file in NASDAQ's format, where each message is preceded by
-its 2-byte length.
+[`src/itch_file.h`](src/itch_file.h) memory-maps one of NASDAQ's sample files. Their layout is not documented:
+each message turns out to be preceded by its 2-byte big-endian length, as in a MoldUDP64 message block.
 
 ### Order books
 

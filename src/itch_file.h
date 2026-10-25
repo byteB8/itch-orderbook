@@ -6,9 +6,9 @@
 #include <string>
 #include <type_traits>
 
-// An ITCH 5.0 file as NASDAQ publishes it: each message is preceded by its length (2 bytes,
-// big-endian). The file is memory-mapped read-only. A cut-off message at the end (from a partial
-// download) is ignored.
+// One of NASDAQ's sample ITCH 5.0 files. Their layout is not documented: each message turns out to be
+// preceded by its length (2 bytes, big-endian), as in a MoldUDP64 message block. The file is
+// memory-mapped read-only. A cut-off message at the end (from a partial download) is ignored.
 class ItchFile {
  public:
   explicit ItchFile(const std::string &path);  // throws std::runtime_error
