@@ -181,10 +181,10 @@ int main(int argc, char **argv) {
     double seconds = clock.toNs(a.lastTicks - a.firstTicks) / 1e9;
     const FeedStats &s = feed->stats();
     std::printf("%s: %llu packets, %llu messages in %.2f s (%.0f messages/s); missed %llu, duplicates %llu, "
-                "malformed %llu; receive buffer %d bytes\n",
+                "malformed %llu, too long %llu; receive buffer %d bytes\n",
                 opt.label.c_str(), (unsigned long long)c.packets, (unsigned long long)a.messages, seconds,
                 a.messages / seconds, (unsigned long long)tracker.gaps(), (unsigned long long)tracker.duplicates(),
-                (unsigned long long)c.malformed, rx.bufferBytes());
+                (unsigned long long)c.malformed, (unsigned long long)c.tooLong, rx.bufferBytes());
     std::printf("books: unknown orders %llu, over-executed %llu, orders on the book %zu\n",
                 (unsigned long long)s.unknownOrders, (unsigned long long)s.overExecuted, feed->liveOrders());
     std::printf("latency, packet received to message applied (ns): p50 %llu  p90 %llu  p99 %llu  p99.9 %llu  "
